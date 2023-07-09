@@ -1,13 +1,12 @@
 import "./App.css";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import NotFound from "./pages/common/NotFound";
 import Home from "./pages/common/Home";
-import PersonPage from "./pages/lists/PersonPage";
+
 import Contactus from "./pages/forms/ContactUs";
 import LogIn from "./pages/forms/login";
 import SignUpForm from "./pages/forms/Signup";
-import UploadPerson from "./pages/forms/uploadPerson";
 
 import PersonDetail from "./pages/details/PersonDetail";
 import UserDashboard from "./pages/Dashboards/user/userDashboard";
@@ -23,6 +22,12 @@ import ShowToast from "./components/PopUps/showToast";
 import ErrorPage from "./pages/common/ErrorPage/ErrorPage";
 import { CustomRouter } from "./customRouter/customRouter";
 import customHistory from "./customRouter/customHistory";
+import { PersonForm } from "./pages/forms/personForm/PersonForm";
+import { PersonDescription } from "./pages/forms/personDescription/PersonDescription";
+import ErrorBoundary from "./core/ErrorBoundary";
+
+//lazy loading components
+const PersonPage = React.lazy(() => import('./pages/lists/PersonPage'));
 
 function AppRoutes() {
   const [show, setShow] = useState(false);
@@ -35,61 +40,40 @@ function AppRoutes() {
 
   return (
     <React.Fragment>
-
-      {/* <div id="signInButton">
-        <GoogleLogin
-          clientId={clientId}
-          buttonText="Sign in with Google"
-          onSuccess={onSuccess}
-          onFailure={onFailure}
-          cookiePolicy={'single_host_origin'}
-          isSignedIn={true}
-        />
-      </div>
-      <div id="signOutButton">
-        <GoogleLogout
-          clientId={clientId}
-          buttonText={"Logout"}
-          onLogoutSuccess={onSuccessLogout}
-        />
-      </div> */}
       <Routes>
+
         <Route path="/" element={<Home />}></Route>
+        <Route path="/test" element={<PersonDescription />}></Route>
+        {/* <Route path="/uploadPerson/:postType(^[1-2]$)" element={<PersonForm />}></Route> */}
+        <Route path="/uploadPerson/:postType" element={<PersonForm />}></Route>
+
+
         <Route path="/Home" element={<Home />}></Route>
         <Route path="/Found-List" element={
-          <PersonPage
-            url={`${process.env.REACT_APP_DOT_NET_API}api/home/getCurrentFoundPosts`}
-            toast={{ setToastMessage, setShow }}
-          />}>
+          <Suspense fallback={<div>Loading...</div>}>
+            <PersonPage
+              url={`${process.env.REACT_APP_DOT_NET_API}api/home/getCurrentFoundPosts`}
+              toast={{ setToastMessage, setShow }}
+            />
+          </Suspense>
+
+        }>
         </Route>
         <Route path="/Lost-List" element={
-          <PersonPage
-            url={`${process.env.REACT_APP_DOT_NET_API}api/home/getCurrentLostPosts`}
-            toast={{ setToastMessage, setShow }}
-          />}>
+          <ErrorBoundary>
+            <Suspense>
+              <PersonPage
+                url={`${process.env.REACT_APP_DOT_NET_API}api/home/getCurrentLostPosts`}
+                toast={{ setToastMessage, setShow }}
+              />
+            </Suspense>
+          </ErrorBoundary>
+        }>
         </Route>
-
         <Route path="/Contact-Us" element={<Contactus />}></Route>
         <Route path="/login" element={<LogIn />}></Route>
         <Route path="/signup" element={<SignUpForm />}></Route>
-        <Route
-          path="/uploadFoundPerson"
-          element={
-            <UploadPerson
-              PostType={TargetType.FOUND}
-              ApiUrl={`${process.env.REACT_APP_DOT_NET_API}api/home/createFoundPersonForm`}
-            />
-          }
-        ></Route>
-        <Route
-          path="/uploadLostPerson"
-          element={
-            <UploadPerson
-              PostType={TargetType.LOST}
-              ApiUrl={`${process.env.REACT_APP_DOT_NET_API}api/home/createLostPersonForm`}
-            />
-          }
-        ></Route>
+
         <Route path="/Person-Details/:id" element={<PersonDetail />}></Route>
         <Route path="/searchPost/:id/:postType" element={<SearchPost />}></Route>
 

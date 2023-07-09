@@ -16,7 +16,8 @@ export const PostStatus =
 export const GenderType =
 {
     Male:1,
-    Female:2
+    Female:2,
+    Other:3
 };
 
 
@@ -25,7 +26,7 @@ export const RelationType =
     Brother:1,
     Sister:2,
     Child:3,
-    Other:4
+    Other:4 
     // Nephew:4
 };
 

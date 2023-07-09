@@ -1,6 +1,6 @@
 import React from "react";
 import { HomeCarousel, ReportImgs, ReviewImgs, FlowGif } from "../../Images/image.js";
-import { Row, Col, Container, Card, Carousel } from 'react-bootstrap';
+import { Row, Col, Container, Card, Carousel,Image } from 'react-bootstrap';
 import NavBar from "../../sections/NavBar";
 import { COLORS } from '../../styles/globalColors.js';
 import './Home.css';
@@ -161,13 +161,7 @@ const Home = () => {
                 </Row>
                 <Row>
                     <div className="d-flex align-items-center justify-content-center">
-                        <img src={FlowGif[0]} class="position-relative"
-                            style={
-                                {
-                                    width: "auto",
-                                    height: "45rem",
-                                }
-                            } alt="Cinque Terre"></img>
+                        <Image src={FlowGif[0]} fluid alt="Flow Diagram"></Image>
                     </div>
                 </Row>
                 <Row className="mt-3 mb-3">

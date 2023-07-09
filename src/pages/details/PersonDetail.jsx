@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import NavBar from "../../sections/NavBar";
-import IfPostDetail from "../../components/DesignComponents/ifPostDetail";
+import { PersonDescription } from "../forms/personDescription/PersonDescription";
 
 function PersonDetail() {
   const { id } = useParams();
@@ -52,7 +52,7 @@ function PersonDetail() {
   return (
     <React.Fragment>
       <NavBar currentUser={localStorage.getItem("email")} />
-      <IfPostDetail postDetail={data}></IfPostDetail>
+      <PersonDescription postDetail={data}></PersonDescription>
     </React.Fragment>
   );
 }

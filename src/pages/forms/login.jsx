@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
 import Input from "../../components/Input";
 import NavBar from "../../sections/NavBar"
-import { Container, Col, Row } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import "./login.css";
 import IFoundSvg from "../../components/Svgs/IfoundSvg";
-import Footer from "../../sections/Footer";
 import { Login as LoginApp } from "../../services/AuthenticationService";
 
 const Login = ({ setTokenForFooter }) => {
@@ -42,7 +40,7 @@ const Login = ({ setTokenForFooter }) => {
   // send 400 in any case and show error
   const validate = async () => {
     try {
-      debugger;
+
       LoginApp(credentials).then(res => {
         console.log(res);
         const {data}=res;

@@ -61,19 +61,15 @@ const PersonPage = ({ url, toast }) => {
     };
 
     const validate = async () => {
-      try{
+      try {
         const token = localStorage.getItem("x_auth_token");
         const tokenData = jwtDecode(token);
         const userType = tokenData[RoleClaim];
-  
         if (userType === "Admin")
           setPermissions({ deletePermission: true })
-      }catch(err)
-      {
-        debugger;
+      } catch (err) {
         console.log(err);
       }
-      
     };
 
     getPersonPostData();

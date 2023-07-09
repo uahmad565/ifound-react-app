@@ -1,12 +1,12 @@
 import { useState } from "react";
 import React from "react";
 import axios from "axios";
-import { Col, Button, ButtonGroup, Row, Dropdown, Container } from "react-bootstrap";
+import { Col, Button, ButtonGroup, Row, Dropdown, Container, Image } from "react-bootstrap";
 // import { Container } from "rsuite";
 import { COLORS } from "../../../../styles/globalColors.js";
 import LocationIcon from "../../../../components/Svgs/locationIcon.jsx";
 import { ActiveCasesMenu, PostStatus } from "../../../../Enums/Enums.js";
-import './addTable.jsx';
+import './addTable.scss';
 
 
 const actionButtons = ["Active", "Resolved"];
@@ -54,53 +54,59 @@ function AddTable({ activeCases, toast, handleDeleteActivePost, handleMarkAsReso
             <div >
                 {
                     activeCases && activeCases.map((activePost, index) => (
-                        <Container >
-                            <Row className="bg-white justify-content-md-center m-1 border border-secondary p-2" key={index}>
-                                <Col xs lg="2" className="d-flex align-items-center justify-content-center">
-                                    <p style={{ backgroundColor: COLORS.ifColumnColor }} className="fs-5">{new Date(activePost.date).toDateString()}</p>
+                        <Container  >
+                            <Row className="bg-white justify-content-md-betwen m-1 border border-secondary p-2" key={index}>
+                                <Col lg={3} className="d-flex align-items-center justify-content-center">
+                                    <Image className="center-cropped" src={"data:image/jpg;base64," + activePost.image} ></Image>
                                 </Col>
-                                <Col xs lg="1" className="d-flex align-items-center justify-content-center">
-                                    <img src={"data:image/jpg;base64," + activePost.image} style={{ width: "70px", height: "100px" }} />
-                                </Col>
-                                <Col xs lg="1" className="d-flex align-items-center justify-content-center">
-                                    <div>
-                                        <LocationIcon height={"20px"} width={"20px"}></LocationIcon>
-                                        <strong>{activePost.city}</strong>
+                                <Col lg={8} className="d-flex flex-column justify-content-around">
+                                    <div className="ms-auto me-auto" style={{ width: '70%' }}>
+                                        <div>
+                                            <p className="h5 fw-bold">{activePost.name}</p>
+                                            <strong> {activePost?.confidence?.toFixed(2)}</strong>
+                                        </div>
+                                        <div className="p-1 ">
+                                            <div className="border-top fw-light">
+                                                <p className="fw-light">
+                                                    {activePost.details.slice(0, maxLength) + (activePost.details.length > maxLength ? "..." : "")}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="d-flex align-items-center mt-2 mb-2">
+                                            {activeButton == 1 && onPostManageClick && <Button onClick={() => onPostManageClick(activePost)} variant="outline-secondary" size="sm">Manage</Button>}
+                                            {handleDeleteActivePost &&
+                                                <Dropdown>
+                                                    <Dropdown.Toggle as={CustomToggleButton}>
+                                                    </Dropdown.Toggle>
+                                                    <Dropdown.Menu >
+                                                        <Dropdown.Item eventKey={activePost.postId} onClick={() => handleDeleteActivePost(activePost.postId)}>Delete</Dropdown.Item>
+                                                        {activeButton == 1 && (<Dropdown.Item eventKey={ActiveCasesMenu.MarkResolve} onClick={() => handleMarkAsResolve(activePost.postId, PostStatus.Resolved)}>Mark Resolve</Dropdown.Item>)}
+                                                        {activeButton == 2 && (<Dropdown.Item eventKey={ActiveCasesMenu.MarkResolve} onClick={() => handleMarkAsResolve(activePost.postId, PostStatus.Unresolved)}>Mark Unresolve</Dropdown.Item>)}
+
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            }
+
+                                            {handleContactModal && <div >
+                                                <Button onClick={() => handleContactModal(activePost)} variant="outline-secondary" size="sm">Contact</Button>
+                                            </div>}
+                                        </div>
                                     </div>
-                                </Col>
-                                <Col xs lg="5">
-                                    <Row>
-                                        <Col md="auto"><div>
-                                            {activePost.name} <strong> {activePost?.confidence?.toFixed(2)}%</strong>
-                                        </div></Col>
 
-                                    </Row>
-                                    <Row className="p-1">
-                                        <Col className="border-top">
-                                            <strong>
-                                                {activePost.details.slice(0, maxLength) + (activePost.details.length > maxLength ? "..." : "")}
-                                            </strong></Col>
-                                    </Row>
-                                </Col>
-                                <Col className="d-flex align-items-center justify-content-center">
-                                    {activeButton == 1 && onPostManageClick && <Button onClick={() => onPostManageClick(activePost)} variant="outline-secondary" size="sm">Manage</Button>}
-                                    {handleDeleteActivePost &&
-                                        <Dropdown>
-                                            <Dropdown.Toggle as={CustomToggleButton}>
-                                            </Dropdown.Toggle>
-                                            <Dropdown.Menu >
-                                                <Dropdown.Item eventKey={activePost.postId} onClick={() => handleDeleteActivePost(activePost.postId)}>Delete</Dropdown.Item>
-                                                {activeButton == 1 && (<Dropdown.Item eventKey={ActiveCasesMenu.MarkResolve} onClick={() => handleMarkAsResolve(activePost.postId, PostStatus.Resolved)}>Mark Resolve</Dropdown.Item>)}
-                                                {activeButton == 2 && (<Dropdown.Item eventKey={ActiveCasesMenu.MarkResolve} onClick={() => handleMarkAsResolve(activePost.postId, PostStatus.Unresolved)}>Mark Unresolve</Dropdown.Item>)}
 
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    }
+                                    <div className="d-flex align-items-center justify-content-end ">
+                                        <div className="d-flex align-items-center justify-content-center">
 
-                                    {handleContactModal && <div >
-                                        <Button onClick={() => handleContactModal(activePost)} variant="outline-secondary" size="sm">Contact</Button>
+                                            <strong>{new Date(activePost.date).toDateString()}</strong>
+                                        </div>
+                                        <div className="ms-2 me-1">{'|'}</div>
+                                        <div className="d-flex align-items-center justify-content-center">
+                                            <LocationIcon height={"20px"} width={"20px"}></LocationIcon>
+                                            <strong>{activePost.city}</strong>
+                                        </div>
 
-                                    </div>}
+                                    </div>
                                 </Col>
                             </Row>
                         </Container>)

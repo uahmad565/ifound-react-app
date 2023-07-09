@@ -1,4 +1,4 @@
-import {Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../styles/navbar.css";
 import * as FaIcons from "react-icons/fa";
 import React, { useState } from "react";
@@ -11,10 +11,9 @@ import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
-import { PostStatus } from "../Enums/Enums";
-import {RiParentFill} from "react-icons/ri";
-import {FaSadCry} from "react-icons/fa";
-import CreateIcon from "../components/Svgs/createIcon";
+import { PostStatus, TargetType } from "../Enums/Enums";
+import { RiParentFill } from "react-icons/ri";
+import { FaSadCry } from "react-icons/fa";
 
 function NavBar(props) {
   const [sidebar, setSidebar] = useState(false);
@@ -22,7 +21,6 @@ function NavBar(props) {
   const showSidebar = () => setSidebar(!sidebar);
 
   const handleLogout = () => {
-     
     localStorage.clear();
   };
   return (
@@ -82,19 +80,6 @@ function NavBar(props) {
                   </NavDropdown>
                 </Link>
               </li>
-              <li className={"nav-text"}>
-                <Link>
-                  <CreateIcon height={18} width={18}/>
-                  <NavDropdown
-                    title="Create New Case"
-                    id="collasible-nav-dropdown"
-                  >
-                    <NavDropdown.Item as={Link} to="/uploadLostPerson">
-                      Create Person Case
-                    </NavDropdown.Item>
-                  </NavDropdown>
-                </Link>
-              </li>
             </ul>
           </nav>
 
@@ -132,11 +117,26 @@ function NavBar(props) {
                   <NavDropdown.Item
                     className="border-top"
                     as={Link}
-                    to="/Found-List"
+                    to={`/Found-List`}
                   >
                     Found Person List
                   </NavDropdown.Item>
                 </NavDropdown>
+                {
+                  props.currentUser &&
+                  <NavDropdown
+                    title="Create Person"
+                    id="collasible-nav-dropdown"
+                  >
+                    <NavDropdown.Item as={Link} to={`/uploadPerson/${TargetType.LOST}`}>
+                      Create Lost Person
+                    </NavDropdown.Item>
+                    <NavDropdown.Item className="border-top" as={Link} to={`/uploadPerson/${TargetType.FOUND}`}>
+                      Create Found Person
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                }
+
               </Nav>
               <Nav>
                 {!props.currentUser && (
