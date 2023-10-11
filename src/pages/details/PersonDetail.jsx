@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import NavBar from "../../sections/NavBar";
 import { PersonDescription } from "../forms/personDescription/PersonDescription";
+import MFooter from "../../sections/MaterialFooter/MFooter";
 
 function PersonDetail() {
   const { id } = useParams();
@@ -31,7 +32,7 @@ function PersonDetail() {
           "city": data.targetPersonDto.location,
           "details": data.targetPersonDto.description,
           "image": data.imageDto.base64String,
-          "date": data.postDate,
+          "date": new Date(data.postDate).toDateString(),
           "gender": data.targetPersonDto.gender,
           "targetType": data.targetPersonDto.targetId,
           "phone": data.phone,
@@ -53,6 +54,7 @@ function PersonDetail() {
     <React.Fragment>
       <NavBar currentUser={localStorage.getItem("email")} />
       <PersonDescription postDetail={data}></PersonDescription>
+      <MFooter/>
     </React.Fragment>
   );
 }

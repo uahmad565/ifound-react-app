@@ -10,22 +10,20 @@ import { cities, genders, relations } from '../../../static/static';
 import { PostPerson } from '../../../services/PostFormService';
 import { ReactComponent as InfoSvg } from '../../../components/Svgs/information.svg';
 import { PostStatus, TargetType } from '../../../Enums/Enums';
-import Footer from '../../../sections/Footer';
 import NavBar from '../../../sections/NavBar';
 import NotFound from '../../common/NotFound';
+import MFooter from '../../../sections/MaterialFooter/MFooter';
 
 export const PersonForm = () => {
   const { postType } = useParams();
   const navigate = useNavigate();
   const [exceptionMsg, setExceptionMsg] = useState("");
 
-  debugger;
   if (parseInt(postType) > 2 || parseInt(postType) < 1) {
     return <NotFound />;
   }
 
   const routeToOnSuccess = () => {
-    // /lostMatchCases/:postStatus
     switch (Number(postType)) {
       case TargetType.LOST:
         navigate(`/lostMatchCases/${PostStatus.Unresolved}`);
@@ -65,7 +63,7 @@ export const PersonForm = () => {
           gender: Yup.string().oneOf(genders.filter((_, index) => index !== 0), 'Invalid Gender Selected').required("Required"),
           age: Yup.number().min(1, "Must be 1 years atleast").max(150, "Mut be 150 or less").required('Required'),
           relation: Yup.string().oneOf(relations.filter((_, index) => index !== 0), "Invalid Relation Type"),
-          description: Yup.string().min(50, "Must be greater than 50 characters").required('Required'),
+          description: Yup.string().min(50, "Must be greater than 49 characters").required('Required'),
           contact: Yup.string().required("required").min(15, "too short").max(17, "too long"),
           image: Yup.mixed().required('Required')
         })}
@@ -76,7 +74,7 @@ export const PersonForm = () => {
             //alert(JSON.stringify(values, null, 2));
             const formData = new FormData();
             const { firstName, lastName, state, gender, age, relation, description, contact, image } = values;
-            formData.append("Name", firstName +" "+ lastName);
+            formData.append("Name", firstName + " " + lastName);
             formData.append("Location", state);
             formData.append("Gender", gender);
             formData.append("Age", age);
@@ -88,7 +86,7 @@ export const PersonForm = () => {
             PostPerson(formData, Number(postType)).then(_res => {
               routeToOnSuccess();
             }).catch(err => {
-              setExceptionMsg(err.response.data)
+              setExceptionMsg(err?.response?.data ? err.response.data : "Person Couldn't Created Please Try Again")
             }).finally(() => {
               setSubmitting(false);
             });
@@ -97,21 +95,21 @@ export const PersonForm = () => {
         }}
       >
         <Form >
-          <Container className='bg-white border border-2 mt-2 mb-2 p-3' style={{ maxWidth: "50%" }}>
+          <Container className='bg-white border border-2 mt-2 mb-2 p-3'>
             <Row className='mb-3'>
               <h3>Create {getPostTypeString()} {" "}Person</h3>
             </Row>
             <Row className='mb-3'>
               <Col sm>
                 <label htmlFor="firstName"><b>First Name</b></label>
-                <Field name="firstName" type="text" className="input-field" />
+                <Field name="firstName" type="text" className="input-field-signup" />
                 <div className="error">
                   <ErrorMessage name="firstName" />
                 </div>
               </Col>
               <Col sm>
                 <label htmlFor="lastName"><b>Last Name</b></label>
-                <Field name="lastName" type="text" className="input-field" />
+                <Field name="lastName" type="text" className="input-field-signup" />
                 <div className="error"><ErrorMessage name="lastName" /></div>
               </Col>
             </Row>
@@ -142,7 +140,7 @@ export const PersonForm = () => {
             <Row className='mb-3'>
               <Col sm>
                 <label htmlFor="age"><b>Age</b></label>
-                <Field name="age" type="number" className="input-field" />
+                <Field name="age" type="number" className="input-field-signup" />
                 <div className="error">
                   <ErrorMessage name="age" />
                 </div>
@@ -160,7 +158,7 @@ export const PersonForm = () => {
             <Row className='mb-3'>
               <Col >
                 <label htmlFor="description"><b>Description</b></label>
-                <Field name="description" as="textarea" rows="5" className="textArea" />
+                <Field name="description" as="textarea" rows="5" className="textArea" maxlength="600"/>
                 <div className="error">
                   <ErrorMessage name="description" />
                 </div>
@@ -247,14 +245,13 @@ export const PersonForm = () => {
                       <span class="sr-only">Loading...</span>
                     </div>
                   }
-
                 </div>
               )}
             </Field>
           </Container>
         </Form>
       </Formik>
-      <Footer />
+      <MFooter />
     </React.Fragment >
 
   );

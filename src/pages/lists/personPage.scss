@@ -35,3 +35,27 @@
     font-size: 14px!important;
     line-height: 20px!important;
 }
+
+
+.name-input{
+    height: 40px;
+    background-size: 20px 20px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+    max-width: 220px;
+}
+
+.search-result{
+    color: #FDB913;
+}
+
+.submit-btn{
+    background: #fdb813 0 0 no-repeat padding-box;
+    /* border: 1px solid #404041; */
+    border-radius: 4px;
+    opacity: 1;
+    font-size: 16px;
+    padding: 3px 17px;
+    color: #404041;
+    display: block;
+    width: 100px;
+}

@@ -27,7 +27,7 @@ const CustomToggleButton = React.forwardRef(({ children, onClick }, ref) => {
 });
 
 //Controlled Component
-function AddTable({ activeCases, toast, handleDeleteActivePost, handleMarkAsResolve, onPostManageClick, detailLength, handleContactModal, activeButton, handleButtonClick }) {
+function AddTable({ activeCases, toast, handleDeleteActivePost, handleMarkAsResolve, onPostManageClick, detailLength, handleContactModal, activeButton, handleButtonClick, label }) {
     console.log(toast);
     console.log("add table cases: ", activeCases);
     const maxLength = detailLength ? detailLength : 150;
@@ -52,10 +52,12 @@ function AddTable({ activeCases, toast, handleDeleteActivePost, handleMarkAsReso
                 </ButtonGroup>
             )}
             <div >
+                {label}
                 {
                     activeCases && activeCases.map((activePost, index) => (
+
                         <Container  >
-                            <Row className="bg-white justify-content-md-betwen m-1 border border-secondary p-2" key={index}>
+                            <Row className="bg-white justify-content-md-betwen mt-1 mb-2 border border-secondary p-2" key={index}>
                                 <Col lg={3} className="d-flex align-items-center justify-content-center">
                                     <Image className="center-cropped" src={"data:image/jpg;base64," + activePost.image} ></Image>
                                 </Col>
@@ -63,7 +65,12 @@ function AddTable({ activeCases, toast, handleDeleteActivePost, handleMarkAsReso
                                     <div className="ms-auto me-auto" style={{ width: '70%' }}>
                                         <div>
                                             <p className="h5 fw-bold">{activePost.name}</p>
-                                            <strong> {activePost?.confidence?.toFixed(2)}</strong>
+                                            {
+                                                activePost?.confidence &&
+                                                (                                                   
+                                                    <strong className="text-success"> {activePost?.confidence?.toFixed(2)+'% Maching Confidence'}</strong>
+                                                )
+                                            }
                                         </div>
                                         <div className="p-1 ">
                                             <div className="border-top fw-light">

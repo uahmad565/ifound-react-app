@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import NavBar from "../../../sections/NavBar";
 import { Card } from "react-bootstrap";
 import Footer from "../../../sections/Footer";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { VerticalBar } from "../Report/VerticalBar";
 import PostCountReport from "../Report/postCountReport";
 import IfDoughnut from "../Report/ifDoughnut";
 import { GetDashboardStats } from "../../../services/ActiveCasesService";
-import useTokenValidate from "../../validateTokenHook";
-
+import useTokenValidate from './../../../services/validateTokenHook.js';
+import { Box, LinearProgress } from "@mui/material";
+import MFooter from "../../../sections/MaterialFooter/MFooter";
 
 function UserDashboard() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("x_auth_token");
 
@@ -58,54 +60,61 @@ function UserDashboard() {
           newObj.PostCountReport = postCountObj;
           return newObj;
         });
-      }).catch(err=>{
+      }).catch(err => {
         debugger;
         console.log(err);
-      });
+      }).finally(() => setLoading(false));
 
     };
-
+    setLoading(true);
     validate();
   }, []);
 
-  return (
-    validate === "true" && (
-      <React.Fragment>
-        <NavBar currentUser={localStorage.getItem("email")} />
-        <Container style={{ marginTop: "2rem" }}>
-          <div>
-            <PostCountReport
-              heading={"Person"}
-              totalLostPosts={personStats.PostCountReport.totalLostPosts}
-              totalFoundPosts={personStats.PostCountReport.totalFoundPosts}
-              totalResolved={personStats.PostCountReport.totalResolved}
-              totalUnResolved={personStats.PostCountReport.totalUnResolved}
-            />
-          </div>
+  if (loading)
+    return (<div>
+      <Box sx={{ width: '100%' }}>
+        <LinearProgress />
+        <h3>Loading..</h3>
+      </Box>
+    </div>
+    )
+  else {
+    return (
+      validate === "true" && (
+        <div>
+          <NavBar currentUser={localStorage.getItem("email")} />
+          <Container className="bg-white" style={{ marginTop: "2rem", minHeight: "80vh" }} >
+            <div className="mt-2 mb-2">
+              <PostCountReport
+                heading={"Person"}
+                totalLostPosts={personStats.PostCountReport.totalLostPosts}
+                totalFoundPosts={personStats.PostCountReport.totalFoundPosts}
+                totalResolved={personStats.PostCountReport.totalResolved}
+                totalUnResolved={personStats.PostCountReport.totalUnResolved}
+              />
+            </div>
 
-          <div className="mt-2 mb-2">
-            <Row >
-              <Card style={{ width: '70%' }} >
+            <Row className="mt-5 mb-2" >
+              <Col md={8} style={{ minHeight: '250px' }} >
                 <VerticalBar />
-              </Card>
-              <Card style={{ width: '30%' }}>
+              </Col>
+              <Col md={4} style={{ minHeight: '250px' }}>
 
                 <IfDoughnut
                   row={personStats.Doughnut}
                 />
-              </Card>
-
+              </Col>
             </Row>
-          </div>
 
-        </Container>
-        <div style={{ minHeight: '10rem' }}>
+          </Container>
+          <MFooter />
+        </div >
+      )
+    );
+  }
 
-        </div>
-        <Footer />
-      </React.Fragment >
-    )
-  );
+
+
 }
 
 export default UserDashboard;

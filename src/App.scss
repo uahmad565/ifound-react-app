@@ -1,3 +1,50 @@
+
+@import './styles/globalColor.scss';
+
+body{
+  // min-height: 100vh;
+}
+
+.if-bg-color{
+  background: $primary-color;
+}
+
+.if-bg-color-inner{
+  background: $secondary-color;
+}
+
+.full-height{
+  height: 100vh;
+}
+/* --------- */
+/*  Preloader */
+/* --------- */
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999999;
+  background-color: #333234;
+  background-image: url(./components/Svgs/pre.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#no-scroll {
+  overflow: hidden;
+  height: 100vh;
+}
+
+#if-scroll{
+  height: 100vh;
+}
+
+#preloader-none {
+  opacity: 0;
+}
+/* End */
 .App-logo {
   height: 40vmin;
   pointer-events: none;

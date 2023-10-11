@@ -2,3 +2,24 @@
     width: 65px;
     height: 32px;
 }
+
+
+.input-field {
+    /* width: 100%; */
+    padding: 15px;
+    margin: 5px 0 5px 0;
+    display: inline-block;
+    border: none;
+    background: white;
+}
+
+
+.dash-line{
+    margin: 0;
+    padding: 0;
+}
+
+.dash-line::after{
+    font-size: 10px;
+    content: "\2014";
+}

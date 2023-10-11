@@ -1,11 +1,23 @@
 import { Container, Row, Col, Image } from "react-bootstrap"
 import { TargetType } from "../../../Enums/Enums";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 
 
 export function PersonDescription({ postDetail }) {
+    useEffect(() => {
+        console.log('Test Component mounted or route changed');
+        // Perform any necessary actions or fetch data here
+
+        return () => {
+            console.log('Test Cleaning Component unmounted or route changed');
+            // Clean up any resources or subscriptions here
+        };
+    }, []);
+
     const { postId, name, age, city, details, image, date, gender, targetType, founderName, phone, fatherName } = postDetail;
-    debugger;
+
     let detail = [
         {
             name: "Name:",

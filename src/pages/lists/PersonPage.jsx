@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
-import { DatePicker } from "rsuite";
+import useSWR from "swr";
+import { Row, Col, Container, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { DatePicker, Input } from "rsuite";
 import IfPersonList from "./low-level/ifPersonList";
 import SearchEvent from "../../components/SearchEvent/SearchEvent";
 import RangeInput from "../../components/RangeInput/rangeInput";
 import DropDown from "../../components/DropDown";
 import NavBar from "../../sections/NavBar";
-import './personPage.css';
+import './personPage.scss';
 import { COLORS } from "../../styles/globalColors";
 import { GenderType } from "../../Enums/Enums";
 import { cities } from "../../static/static";
@@ -16,73 +18,66 @@ import { DeleteActivePost } from "../../services/ActiveCasesService";
 import Footer from "../../sections/Footer";
 import { MapGeneralPersonList } from "./low-level/helperServices/PersonMap";
 import { RoleClaim } from "../../AspNetClaims";
+import { ReactComponent as InfoSvg } from '../../components/Svgs/information.svg';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormHelperText from '@mui/material/FormHelperText';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MFooter from "../../sections/MaterialFooter/MFooter";
+import { FilterLabel } from "../../components/filterLabel";
 
 
-const PersonPage = ({ url, toast }) => {
-  const navigate = useNavigate();
+function fetchWithToken(url, token) {
+  return axios.get(url, { headers: { Authorization: `Bearer ${token}` } }).then(({ data }) => {
+    const posts = MapGeneralPersonList(data);
+    return posts;
+  });
+}
+
+const PersonPage = ({ toast }) => {
+
+  const location = useLocation();
+  console.log(location.pathname);
+  let url = "";
+  if (location.pathname.toLowerCase() === "/lost-list".toLowerCase())
+    url = `${process.env.REACT_APP_DOT_NET_API}api/home/getCurrentLostPosts`;
+  else if (location.pathname.toLowerCase() === "/found-list".toLowerCase())
+    url = `${process.env.REACT_APP_DOT_NET_API}api/home/getCurrentFoundPosts`;
 
   const [filterInput, setFilterInput] = useState({
     rangeInput: {
       min: "",
       max: "",
     },
-    selectedDate: "",
+    fromDate: "",
+    toDate: "",
     selectedGender: Object.values(GenderType)[0],
-    selectedState: cities[0]
-
+    selectedState: cities[0],
+    name: ""
   });
 
-  const [loading, setLoading] = useState(true);
-  // const [PersonPosts, setPersonPosts] = useState([]);
-  const [posts, setPosts] = useState({
-    personPosts: [],
-    filteredPosts: []
-  })
+  const [filteredPosts, setPosts] = useState([])
+  const [permissions, setPermissions] = useState({ deletePermission: false });
+  const [filteredCities, setFilteredCities] = useState(cities);
 
-  const [permissions, setPermissions] = useState({
-    deletePermission: false
-  })
+  const token = localStorage.getItem("x_auth_token");
+  const { data: postList, error: myEror, isLoading } = useSWR([url, token], ([url, token]) => fetchWithToken(url, token));
 
-  useEffect(() => {
-    const getPersonPostData = async () => {
-      const token = localStorage.getItem("x_auth_token");
+  console.log("SWR returned: ", postList, myEror);
 
-      try {
-        const { data } = await axios.get(
-          url, { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const posts = MapGeneralPersonList(data);
-        setPosts({ filteredPosts: posts, personPosts: posts });
-        setLoading(false);
-      } catch (err) {
-        // const description = err.toString();
-        // navigate("/error", { state: { description } });
-      }
-    };
+  if (postList && filteredPosts.length == 0) {
+    console.log("data");
+    setPosts(postList);
+  }
 
-    const validate = async () => {
-      try {
-        const token = localStorage.getItem("x_auth_token");
-        const tokenData = jwtDecode(token);
-        const userType = tokenData[RoleClaim];
-        if (userType === "Admin")
-          setPermissions({ deletePermission: true })
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    getPersonPostData();
-    validate();
-  }, [url]);
-
-
+  //events
   const handleDeleteActivePost = (postId) => {
 
     // Handle option change event
     DeleteActivePost(postId).then(_response => {
-      const filteredPosts = posts.filteredPosts.filter(post => post.postId !== postId);
-      setPosts({ ...posts, filteredPosts });
+      const filteredPosts = postList.filter(post => post.postId !== postId);
+      setPosts(filteredPosts);
       toast.setToastMessage({ headerText: "Active Case", bodyText: "DELETE request successful" });
       toast.setShow(true);
     }).catch(error => {
@@ -92,54 +87,40 @@ const PersonPage = ({ url, toast }) => {
     });
   }
 
-  const handleDateChange = (date) => {
-    setFilterInput({ ...filterInput, selectedDate: date });
+  //cities 
 
-    const filteredPosts = posts.personPosts.filter(x => {
-      if (!date) return posts.personPosts;
-      if (x.date) {
-        const serverDateObj = new Date(x.date);
-        const dateObj = new Date(date);
-        if (serverDateObj.getFullYear() > dateObj.getFullYear()) {
-          return x;
-        }
-        else if (serverDateObj.getFullYear() === dateObj.getFullYear()) {
-          if (serverDateObj.getMonth() > dateObj.getMonth()) {
-            return x;
-          }
-          else if (serverDateObj.getMonth() === dateObj.getMonth()) {
-            if (serverDateObj.getDate() > dateObj.getDate()) {
-              return x;
-            }
-            else if (serverDateObj.getDate() === dateObj.getDate()) {
-              return x;
-            }
-          }
-        }
-      }
+  const handleSearchEvent = (e) => {
+    setFilterInput({ ...filterInput, selectedState: e.target.value });
+    const results = cities.filter((city) => {
+      if (e.target.value === "") return cities;
+      return city.toLowerCase().includes(e.target.value.toLowerCase());
     });
-    setPosts({ ...posts, filteredPosts });
-    console.log("Filtered Posts \"From\": ", filteredPosts);
 
+    setFilteredCities(results);
+    console.log(results);
+  };
+  //
+  const handleToDateChange = (date) => {
+    setFilterInput({ ...filterInput, toDate: date.toISOString() });
+  };
+
+  const handleFromDateChange = (date) => {
+    setFilterInput({ ...filterInput, fromDate: date.toISOString() });
   };
 
   const onSearchClick = (state, setIsOpen) => {
     setFilterInput({ ...filterInput, selectedState: state });
     setIsOpen(false);
-    if (state === "Select None") {
-      setPosts({ ...posts, filteredPosts: posts.personPosts });
-      return;
-    }
-    const filteredPosts = posts.personPosts.filter(post => {
-      return post.city === state;
-    });
-    setPosts({ ...posts, filteredPosts });
+  }
+
+  const handleNameChange = (name) => {
+    setFilterInput({ ...filterInput, name });
   }
 
   const handleGenderChange = (gender) => {
     setFilterInput({ ...filterInput, selectedGender: gender });
-    const filteredPosts = posts.personPosts.filter(post => post.gender === gender);
-    setPosts({ ...posts, filteredPosts });
+    const filteredPosts = postList.filter(post => post.gender === gender);
+    setPosts(filteredPosts);
   }
 
   const handleMinAgeChange = (event) => {
@@ -159,58 +140,135 @@ const PersonPage = ({ url, toast }) => {
     });
   }
 
-  const handleAgeGoClick = () => {
-    const { rangeInput } = filterInput;
-    if (!rangeInput.min || !rangeInput.max) {
-      setPosts({ ...posts, filteredPosts: posts.personPosts });
-      return;
-    }
-    if (!isNaN(+rangeInput.min) && !isNaN(+rangeInput.max)) {
-      const filteredPosts = posts.personPosts.filter(post => post.age >= rangeInput.min && post.age <= rangeInput.max);
-      setPosts({
-        ...posts,
-        filteredPosts
-      });
-    }
+
+  const handleSubmitButton = () => {
+    console.log("Submit Button Pressed", filterInput);
+    let url = `${process.env.REACT_APP_DOT_NET_API}api/home/filterPosts`;
+    const queryString = `City=${filterInput.selectedState}&Name=${filterInput.name}&MinAge=${filterInput.rangeInput.min}&MaxAge=${filterInput.rangeInput.max}&Gender=${filterInput.selectedGender}&FromDate=${filterInput.fromDate}&PageNo=${1}&PageSize=${10}`;
+    url += "?" + queryString;
+    axios.get(url, { headers: { Authorization: `Bearer ${token}` } }).then(response => {
+      console.log("Submit Button Response",response);
+    }).catch(error => {
+      debugger;
+      console.log(error);
+    });
   }
 
-  // const screenHeight = window.innerHeight;
+  const handleResetButton = () => {
+    setFilterInput({
+      rangeInput: {
+        min: "",
+        max: "",
+      },
+      fromDate: "",
+      toDate: "",
+      selectedGender: Object.values(GenderType)[0],
+      selectedState: cities[0],
+      name: ""
+    });
+  }
+
   return (
     <React.Fragment>
       <NavBar currentUser={localStorage.getItem("email")} />
       {/* <h1 className="App-header">Lost List</h1> */}
-      <div className="MainContent">
-        <div className="d-flex align-items-center justify-content-around FilterStyle">
+      <div style={{ minHeight: "70vh" }}>
+        <Container className="mt-5 mb-5">
+          <Row className="mb-3">
+            <div className="d-flex justify-content-center">
+              <p className="fs-2 text-black fw-bold">Search Missing/Found Children Posters</p>
+            </div>
+          </Row>
+          <Row className="mb-1">
+            <Col>
+              <label class="fs-6 fw-bold me-1" style={{ color: COLORS.ifSpanColor }}>State: {" "}
+                <OverlayTrigger placement="top" overlay={locationTooltip}>
+                  <InfoSvg />
+                </OverlayTrigger>
+              </label>
+              <SearchEvent
+                onSearchClick={onSearchClick}
+                inputValue={filterInput.selectedState}
+                handleSearchEvent={handleSearchEvent}
+                filteredList={filteredCities} />
+            </Col>
 
-          <SearchEvent onSearchClick={onSearchClick} />
-          <RangeInput
-            label={"Age"}
-            minValue={filterInput.rangeInput.min}
-            maxValue={filterInput.rangeInput.max}
-            handleMinChange={handleMinAgeChange}
-            handleMaxChange={handleMaxAgeChange}
-            handleGoClick={handleAgeGoClick}></RangeInput>
-          <DropDown list={Object.keys(GenderType)} label="Gender" dropDownChange={handleGenderChange} />
-          <div id="start-date">
-            <label class="fs-6 me-1" style={{ color: COLORS.ifSpanColor }}>From</label>
-            <DatePicker onChange={handleDateChange} format="yyyy-MM-dd" />
-          </div>
-          <div id="start-date">
-            <label class="fs-6 me-1" style={{ color: COLORS.ifSpanColor }}>To</label>
-            <DatePicker onChange={handleDateChange} format="yyyy-MM-dd" />
-          </div>
-        </div>
-        <IfPersonList
-          PersonPosts={posts.filteredPosts}
-          loading={loading}
-          recordsPerPage={4}
-          deletePermission={permissions.deletePermission}
-          handleDeleteActivePost={handleDeleteActivePost}
-        />
+          </Row>
+          <Row style={{ rowGap: "1rem" }}>
+            <Col sm className="m-auto">
+              <FilterLabel label={'Name:'} />
+              <Input className="name-input" onChange={handleNameChange} value={filterInput.name} />
+            </Col>
+            <Col xs sm className="m-auto">
+              <RangeInput
+                label={"Age:"}
+                minValue={filterInput.rangeInput.min}
+                maxValue={filterInput.rangeInput.max}
+                handleMinChange={handleMinAgeChange}
+                handleMaxChange={handleMaxAgeChange}
+                toolTipMessage={"Age range of missing / found Person"}
+              />
+            </Col>
+            <Col xs sm={3} lg={2} className="m-auto">
+              <div>
+                <FilterLabel label={'Gender:'} />
+                <DropDown list={Object.keys(GenderType)} label="Gender" dropDownChange={handleGenderChange} />
+              </div>
+            </Col>
+            <Col sm className="m-auto">
+              <div className="d-flex flex-column justify-content-end">
+                <div>
+                  <label class="fs-6 text-black fw-bold me-1" style={{ color: COLORS.ifSpanColor }}>Date: {" "}
+                    <OverlayTrigger placement="top" overlay={dateToolTip}>
+                      <InfoSvg />
+                    </OverlayTrigger>
+                  </label>
+                </div>
+                <div className="mb-2" id="start-date">
+                  <DatePicker onChange={handleFromDateChange} format="yyyy-MM-dd" />
+                </div>
+                <div id="end-date">
+                  <DatePicker onChange={handleToDateChange} format="yyyy-MM-dd" />
+                </div>
+              </div>
+            </Col>
+            <Col sm className="m-auto">
+              <div className="d-lg-flex flex-lg-column mt-lg-3">
+                <button className="submit-btn m-1" onClick={handleSubmitButton}>Submit</button>
+                <button className="submit-btn m-1" onClick={handleResetButton}>Reset</button>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+        <Container>
+          <Row>
+            <p className="h5 search-result fw-bold">Search Results: 573</p>
+          </Row>
+          <IfPersonList
+            PersonPosts={filteredPosts ? filteredPosts : []}
+            loading={isLoading}
+            recordsPerPage={6}
+            deletePermission={permissions.deletePermission}
+            handleDeleteActivePost={handleDeleteActivePost}
+          />
+        </Container>
       </div>
-      <Footer />
+      <MFooter />
     </React.Fragment>
   );
 };
+
+
+const dateToolTip = (
+  <Tooltip id="tooltip">
+    <p className="fs-0 fw-light">Date Range when the Child went missing/found</p>
+  </Tooltip>
+);
+
+const locationTooltip = (
+  <Tooltip id="tooltip">
+    <p className="fs-0 fw-light">Location where child went lost/found</p>
+  </Tooltip>
+);
 
 export default PersonPage;

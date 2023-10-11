@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { VerifyToken } from "../services/AuthenticationService";
+import { VerifyToken } from "./AuthenticationService";
 
 function useTokenValidate(token) {
     const navigate = useNavigate();

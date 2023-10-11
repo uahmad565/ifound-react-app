@@ -4,5 +4,5 @@ export const COLORS={
     ifDarkBlue:"#2E2E54",
     ifSpanColor:"#0F1111",
     ifColumnColor:"#f7f8f8",
-    
+    ifBackgroupColor:"#F1F1F1"
 };

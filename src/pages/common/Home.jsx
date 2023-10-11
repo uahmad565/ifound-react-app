@@ -1,13 +1,31 @@
 import React from "react";
 import { HomeCarousel, ReportImgs, ReviewImgs, FlowGif } from "../../Images/image.js";
-import { Row, Col, Container, Card, Carousel,Image } from 'react-bootstrap';
+import { Row, Col, Container, Card, Carousel, Image } from 'react-bootstrap';
+import Cookies from "js-cookie";
 import NavBar from "../../sections/NavBar";
 import { COLORS } from '../../styles/globalColors.js';
 import './Home.css';
 import Footer from "../../sections/Footer.jsx";
 
 
+
 const Home = () => {
+
+    debugger;
+    const cookieValue = Cookies.get('IFound_Token');
+    if (cookieValue) {
+        const jsonObject = JSON.parse(cookieValue);
+        if (jsonObject) {
+            const { name, email, x_auth_token } = jsonObject.value;
+            console.log("Cookie IFound Token: ", jsonObject);
+            localStorage.setItem("email", email);
+            localStorage.setItem("name", name);
+            localStorage.setItem("x_auth_token", x_auth_token);
+        }
+    }
+
+
+
     const reviews = [
         { _id: 1, text: "abc" },
         // { _id: 2, text: "def" }
@@ -118,12 +136,12 @@ const Home = () => {
                     <Carousel interval={1000}>
                         {homeCarousel.map((value, index) => (
                             <Carousel.Item key={index}>
-                                <div className=" m-auto" style={{width:"50vh"}}>
+                                <div className=" m-auto" style={{ width: "50vh" }}>
                                     <img
                                         className="d-block w-100"
                                         src={value.img}
                                         alt={value.alt}
-                                        style={{ height: "400px",width:"10px" }}
+                                        style={{ height: "400px", width: "10px" }}
                                     />
                                 </div>
 
